@@ -23,6 +23,10 @@ model: sonnet
   해당 기능에 대한 커버리지가 부족하면, Controller 계층 로직(상태 전이, 수율/ceil 계산, FIFO 순서)에 대한
   단위/통합 테스트를 직접 작성하세요 — CLAUDE.md의 아키텍처상 이 로직은 콘솔 입력을 시뮬레이션할 필요가
   없어야 합니다.
+- **테스트는 반드시 pytest로 작성/실행합니다.** `unittest.TestCase`/`unittest.main()` 스타일을 쓰지 마세요.
+  일반 함수 + `assert` 문, 픽스처가 필요하면 `pytest.fixture`(임시 파일/디렉터리는 `tmp_path` 픽스처 사용),
+  예외 검증은 `pytest.raises`를 사용하세요. 실행도 `python -m pytest`(또는 `pytest`)로만 하고
+  `python -m unittest`류 러너는 사용하지 않습니다.
 - 콘솔 전체 흐름을 확인할 때는 파이프 입력으로 `main.py`를 구동해(예:
   `echo -e "1\n...\n0" | python main.py` 또는 이에 준하는 스크립트 입력) docs/PLAN.md 체크리스트 시나리오를
   끝까지 실행하고, 종료 코드만이 아니라 실제 출력 내용을 확인하세요.
