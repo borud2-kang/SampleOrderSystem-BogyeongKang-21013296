@@ -12,6 +12,14 @@ from typing import Callable, Dict, Generic, List, Optional, TypeVar
 T = TypeVar("T")
 
 
+class DuplicateIdError(ValueError):
+    """`create()` 호출 시 이미 존재하는 ID로 엔티티를 생성하려 할 때 발생한다.
+
+    저장(`_save()`) 단계에서 발생하는 다른 ValueError(예: 인코딩 문제로 인한
+    UnicodeEncodeError)와 구분하기 위한 전용 예외 타입이다.
+    """
+
+
 class JsonRepository(Generic[T]):
     def __init__(
         self,
@@ -47,9 +55,15 @@ class JsonRepository(Generic[T]):
     def create(self, entity: T) -> T:
         entity_id = self._to_dict(entity)[self._id_field]
         if entity_id in self._data:
-            raise ValueError(f"이미 존재하는 ID 입니다: {entity_id}")
+            raise DuplicateIdError(f"이미 존재하는 ID 입니다: {entity_id}")
         self._data[entity_id] = entity
-        self._save()
+        try:
+            self._save()
+        except Exception:
+            # 메모리와 파일 상태가 어긋나지 않도록, 저장 실패 시 방금 넣은
+            # 엔트리를 롤백한다.
+            del self._data[entity_id]
+            raise
         return entity
 
     def get(self, entity_id: str) -> Optional[T]:
@@ -64,15 +78,28 @@ class JsonRepository(Generic[T]):
     def update(self, entity_id: str, entity: T) -> T:
         if entity_id not in self._data:
             raise KeyError(f"존재하지 않는 ID 입니다: {entity_id}")
+        previous_entity = self._data[entity_id]
         self._data[entity_id] = entity
-        self._save()
+        try:
+            self._save()
+        except Exception:
+            # 메모리와 파일 상태가 어긋나지 않도록, 저장 실패 시 이전 값으로
+            # 롤백한다.
+            self._data[entity_id] = previous_entity
+            raise
         return entity
 
     def delete(self, entity_id: str) -> None:
         if entity_id not in self._data:
             raise KeyError(f"존재하지 않는 ID 입니다: {entity_id}")
-        del self._data[entity_id]
-        self._save()
+        previous_entity = self._data.pop(entity_id)
+        try:
+            self._save()
+        except Exception:
+            # 메모리와 파일 상태가 어긋나지 않도록, 저장 실패 시 삭제를
+            # 취소(복원)한다.
+            self._data[entity_id] = previous_entity
+            raise
 
     def exists(self, entity_id: str) -> bool:
         return entity_id in self._data
