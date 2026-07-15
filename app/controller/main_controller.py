@@ -9,6 +9,7 @@ from app.view.main_view import MainView
 from app.view.order_view import OrderView
 from app.view.production_view import ProductionView
 from app.view.sample_view import SampleView
+from app.view.shipment_view import ShipmentView
 
 from app.controller.approval_controller import ApprovalController
 from app.controller.monitoring_controller import MonitoringController
@@ -29,6 +30,7 @@ class MainController:
         self._order_view = OrderView()
         self._approval_view = ApprovalView()
         self._production_view = ProductionView()
+        self._shipment_view = ShipmentView()
 
         self._sample_controller = SampleController(self._sample_repo, self._sample_view)
         self._order_controller = OrderController(
@@ -41,7 +43,9 @@ class MainController:
         self._production_controller = ProductionController(
             self._production_queue, self._order_repo, self._sample_repo, self._production_view
         )
-        self._shipment_controller = ShipmentController(self._order_repo, self._sample_repo)
+        self._shipment_controller = ShipmentController(
+            self._order_repo, self._sample_repo, self._shipment_view
+        )
 
     def run(self) -> None:
         while True:
