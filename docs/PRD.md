@@ -91,6 +91,15 @@ RESERVED --(거절)--> REJECTED
 
 ## 6. 기능 요구사항
 
+아래는 요약이며, 기능별 상세 명세(입력값, 처리 흐름, 엣지 케이스)는 `FEATURES/` 하위 문서를 참고한다:
+
+- [01-sample.md](FEATURES/01-sample.md) — 시료 관리
+- [02-order.md](FEATURES/02-order.md) — 시료 주문(예약)
+- [03-approval.md](FEATURES/03-approval.md) — 주문 승인/거절
+- [04-monitoring.md](FEATURES/04-monitoring.md) — 모니터링
+- [05-production-line.md](FEATURES/05-production-line.md) — 생산 라인
+- [06-shipment.md](FEATURES/06-shipment.md) — 출고 처리
+
 ### 6.1 메인 메뉴
 
 - 기능별 선택 화면 표시.
