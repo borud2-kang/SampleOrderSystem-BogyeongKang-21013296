@@ -11,6 +11,8 @@
 
 **목표**: 화면은 비어 있어도 되지만, 아키텍처와 데이터 저장/로딩 파이프라인이 동작해야 한다.
 
+상세 설계: [`docs/design/phase0.md`](design/phase0.md)
+
 - Model / Controller / View 패키지 구조 확립 (`../ConsoleMVC` 패턴 참고).
 - Sample/Order 데이터 모델과 JSON(또는 선택한 방식) 기반 영속성 계층 연동 (`../DataPersistence` 패턴 참고).
 - 메인 메뉴 화면(6개 메뉴 항목 표시)만 존재하고, 각 메뉴는 "준비 중" 정도로 응답해도 무방.
