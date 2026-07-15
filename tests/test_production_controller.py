@@ -1,5 +1,5 @@
 """ProductionController 단위 테스트. ProductionView를 테스트 더블로 대체해 stdin 시뮬레이션 없이
-FIFO 순서 / 재고 반영(shortage_qty만 반영, actual_qty 여유분 미누적) / 상태 전환을 검증한다."""
+FIFO 순서 / 재고 반영(actual_qty 전체 반영, 올림 처리로 인한 여유분 유지) / 상태 전환을 검증한다."""
 
 import pytest
 
@@ -102,10 +102,10 @@ def test_fifo_order_shown_current_and_waiting(order_repo, sample_repo, productio
     assert view.waiting_shown == [[job2, job3]]
 
 
-def test_complete_current_updates_stock_by_shortage_not_actual_qty(
+def test_complete_current_credits_full_actual_qty_leaving_surplus(
     order_repo, sample_repo, production_queue
 ):
-    """핵심 검증: actual_qty(여유분 포함) 가 아니라 shortage_qty 만 재고에 반영되어야 한다."""
+    """핵심 검증: actual_qty(올림 처리로 인한 여유분 포함) 전체가 재고에 반영되어야 한다."""
     sample = make_sample(sample_repo, stock=10)
     order = make_order(order_repo, sample_id=sample.sample_id, quantity=180)
     # 부족분 = 170, 실 생산량(ceil(170/0.92)) = 185 (여유분 15)
@@ -118,15 +118,29 @@ def test_complete_current_updates_stock_by_shortage_not_actual_qty(
     controller.run()
 
     saved_sample = sample_repo.get(sample.sample_id)
-    # 최종 재고 = 기존 재고(10) + shortage_qty(170) - order.quantity(180) = 0
-    assert saved_sample.stock == 0
-
-    # actual_qty(185)가 그대로 반영됐다면 재고는 10 + 185 - 180 = 15가 되어야 하므로,
-    # 여유분(actual_qty - shortage_qty = 15)이 누적되지 않았는지 명시적으로 확인.
-    assert saved_sample.stock != 10 + job.actual_qty - order.quantity
+    # 최종 재고 = 기존 재고(10) + actual_qty(185) - order.quantity(180) = 15 (여유분 그대로 남음)
+    assert saved_sample.stock == 10 + job.actual_qty - order.quantity
+    assert saved_sample.stock == 15
 
     saved_order = order_repo.get(order.order_id)
     assert saved_order.status == OrderStatus.CONFIRMED
+
+
+def test_complete_current_no_surplus_when_actual_qty_equals_shortage(
+    order_repo, sample_repo, production_queue
+):
+    """수율이 정확히 1이거나 나눠떨어져 여유분이 0인 경우, 재고 순증감도 0이어야 한다."""
+    sample = make_sample(sample_repo, stock=0)
+    order = make_order(order_repo, sample_id=sample.sample_id, quantity=10)
+    job = ProductionJob(order.order_id, sample.sample_id, shortage_qty=10, actual_qty=10, total_time=10.0)
+    production_queue.enqueue(job)
+
+    view = FakeProductionView(choices=["2", "0"])
+    controller = ProductionController(production_queue, order_repo, sample_repo, view)
+
+    controller.run()
+
+    assert sample_repo.get(sample.sample_id).stock == 0
 
 
 def test_complete_current_transitions_producing_to_confirmed_and_persists(

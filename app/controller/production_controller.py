@@ -35,7 +35,7 @@ class ProductionController:
             return
 
         sample = self._sample_repo.get(job.sample_id)
-        sample.stock += job.shortage_qty
+        sample.stock += job.actual_qty
         self._sample_repo.update(sample.sample_id, sample)
 
         order = self._order_repo.get(job.order_id)
