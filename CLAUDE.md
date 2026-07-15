@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 현황
 
-이 저장소는 `docs/PLAN.md`의 Phase 0~6(뼈대, 시료 관리, 시료 주문, 승인/거절, 생산 라인, 출고 처리,
-모니터링)까지 구현이 끝난 상태입니다 — 메인 메뉴 6개 항목이 모두 실제 기능으로 동작하며, `app/model`,
-`app/persistence`, `app/controller`, `app/view`, `main.py`, `tests/`(pytest, 각 Phase별 단위 테스트)가
-존재합니다. 남은 작업은 `docs/PLAN.md` Phase 7(마무리: Dummy 데이터 생성, 테스트/문서 정리)뿐입니다.
-빌드 설정(패키지 매니저/의존성 파일)은 아직 없습니다. 이 프로젝트는 Python 으로 구현합니다.
+이 저장소는 `docs/PLAN.md`의 Phase 0~7(뼈대, 시료 관리, 시료 주문, 승인/거절, 생산 라인, 출고 처리,
+모니터링, 마무리)까지 구현이 끝난 상태입니다 — 메인 메뉴 6개 항목이 모두 실제 기능으로 동작하며,
+`app/model`, `app/persistence`, `app/controller`, `app/view`, `app/generator`(더미 데이터 생성),
+`main.py`, `generate_dummy_data.py`, `README.md`, `tests/`(pytest, 각 Phase별 단위 테스트 + 전체 흐름
+통합 테스트)가 존재합니다. 이 프로젝트는 Python 으로 구현합니다.
 
 이 저장소는 2개 미션 중 "[미션2] 프로젝트 개발"에 해당합니다. 미션1(PoC)은 이미 구현이 끝난 **독립적인
 프로젝트/git 저장소**로, 이 저장소(`SampleOrderSystem`)와 같은 상위 디렉터리(`C:\reviewer\Project\`) 아래에
