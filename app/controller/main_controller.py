@@ -4,6 +4,7 @@ from app.model.order import OrderStatus
 from app.persistence.order_repository import OrderRepository
 from app.persistence.production_queue import ProductionQueue
 from app.persistence.sample_repository import SampleRepository
+from app.view.approval_view import ApprovalView
 from app.view.main_view import MainView
 from app.view.order_view import OrderView
 from app.view.sample_view import SampleView
@@ -25,13 +26,14 @@ class MainController:
         self._view = MainView()
         self._sample_view = SampleView()
         self._order_view = OrderView()
+        self._approval_view = ApprovalView()
 
         self._sample_controller = SampleController(self._sample_repo, self._sample_view)
         self._order_controller = OrderController(
             self._order_repo, self._sample_repo, self._order_view
         )
         self._approval_controller = ApprovalController(
-            self._order_repo, self._sample_repo, self._production_queue
+            self._order_repo, self._sample_repo, self._production_queue, self._approval_view
         )
         self._monitoring_controller = MonitoringController(self._order_repo, self._sample_repo)
         self._production_controller = ProductionController(
