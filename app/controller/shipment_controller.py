@@ -1,4 +1,4 @@
-"""출고 처리 Controller. Phase 0에서는 스텁이며, Phase 6부터 실제 기능을 채운다."""
+"""출고 처리 Controller. Phase 0에서는 스텁이며, Phase 5부터 실제 기능을 채운다."""
 
 
 class ShipmentController:

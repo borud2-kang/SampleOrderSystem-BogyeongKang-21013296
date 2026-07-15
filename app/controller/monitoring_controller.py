@@ -1,4 +1,4 @@
-"""모니터링 Controller. Phase 0에서는 스텁이며, Phase 5부터 실제 기능을 채운다."""
+"""모니터링 Controller. Phase 0에서는 스텁이며, Phase 6부터 실제 기능을 채운다."""
 
 
 class MonitoringController:
