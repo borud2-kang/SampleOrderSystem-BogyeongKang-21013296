@@ -6,8 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 이 저장소는 아직 구현 이전 단계입니다: 미션 명세 PDF(`pdf/[CRA_AI] Day3_개인과제_반도체시료관리_r1 2.pdf`)와
 IDE/프로젝트 스캐폴딩만 존재하며, 애플리케이션 소스 코드·테스트 스위트·빌드 설정은 아직 없습니다.
-`.idea/SampleOrderSystem.iml` 모듈이 Python 모듈로 설정되어 있으므로, 별도 지시가 없는 한 이 프로젝트는
-Python으로 구현합니다.
+이 프로젝트는 Python 으로 구현합니다.
 
 이 저장소는 2개 미션 중 "[미션2] 프로젝트 개발"에 해당합니다. 미션1(PoC)은 이미 구현이 끝난 **독립적인
 프로젝트/git 저장소**로, 이 저장소(`SampleOrderSystem`)와 같은 상위 디렉터리(`C:\reviewer\Project\`) 아래에
@@ -29,17 +28,6 @@ Python으로 구현합니다.
 명세에 따르면 이번 미션의 평가 주안점은 CLAUDE.md/PRD.md 등 문서 관리, Harness 도입, Test, CleanCode, Commit
 이력이므로 이를 "있으면 좋은 것"이 아니라 실제 평가 기준으로 취급해야 합니다.
 
-## 커맨드
-
-아직 빌드/테스트 도구가 마련되어 있지 않습니다. 프로젝트를 스캐폴딩할 때, 이 저장소의 `.gitignore`가 이미
-표준 Python 구성(`.venv/`, `__pycache__/`, `.pytest_cache/`)을 전제하고 있으므로 다음을 따르는 것이 자연스럽습니다:
-
-- 가상환경: `python -m venv .venv` 로 생성 후, 설치/실행 전에 반드시 활성화합니다.
-- 테스트: `pytest`를 사용합니다. 테스트가 만들어지면 전체 스위트는 `pytest`, 특정 파일은
-  `pytest path/to/test_file.py`, 특정 테스트 하나는 `pytest path/to/test_file.py::test_name`으로 실행합니다.
-
-실제 실행 진입점 커맨드(예: `python -m sampleordersystem` 또는 `python main.py`)와 lint/format 커맨드가
-정해지는 즉시 이 섹션을 갱신하세요.
 
 ## 도메인: 반도체 시료 생산주문관리 시스템
 
