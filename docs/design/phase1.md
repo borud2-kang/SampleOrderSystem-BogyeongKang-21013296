@@ -31,9 +31,17 @@ SampleOrderSystem/
     test_sample_controller.py # 신규: SampleController 단위 테스트 (stdin 시뮬레이션 없이)
 ```
 
-`app/model/sample.py`, `app/persistence/sample_repository.py`, `app/persistence/json_repository.py`는
-Phase 0에서 이미 완성되어 있으므로 이 Phase에서는 수정하지 않는다 (필요한 API: `create`, `get_all`, `find`,
-`next_id`, `create` 시 중복 ID면 `ValueError`).
+`app/model/sample.py`, `app/persistence/sample_repository.py`는 Phase 0에서 이미 완성되어 있으므로 이
+Phase에서는 수정하지 않는다 (필요한 API: `create`, `get_all`, `find`, `next_id`).
+
+> **사후 기록**: `app/persistence/json_repository.py`는 애초 이 문서가 작성된 시점엔 수정 대상이
+> 아니었으나, Phase 1 구현을 검증하는 과정에서 cp949 콘솔 인코딩 문제로 인해 "저장 실패 시 메모리와
+> 파일 상태가 어긋나는" 버그가 발견되어 Phase 1 작업 중에 함께 수정했다. 구체적으로 `create`가 중복
+> ID일 때 던지는 예외를 일반 `ValueError`에서 전용 타입 `DuplicateIdError(ValueError)`로 좁히고,
+> `create`/`update`/`delete` 모두 `_save()` 실패 시 메모리 변경을 롤백하도록 고쳤다. 아래 절의
+> `ValueError` 표기는 이 변경 이전 설계 당시 표기이며, 실제 코드는 `DuplicateIdError`를 사용한다
+> (`app/controller/sample_controller.py`도 `except DuplicateIdError`로 좁혀 잡는다). 상세는
+> [`phase2.md`](phase2.md)에서 정확한 이름으로 다시 인용한다.
 
 ## Controller 설계
 
@@ -127,20 +135,21 @@ class SampleView:
 | --- | --- | --- |
 | 숫자 형식 오류 (문자열 입력 등) | View (재입력 루프) | 콘솔 입력 파싱은 View의 책임. Controller/Model은 이미 파싱된 값만 받는다. |
 | 수율 범위(0 초과 1 이하) | View (재입력 루프) | 콘솔에서 즉시 재입력받는 것이 사용자 경험상 자연스럽고, ConsoleMVC 패턴과 일치. |
-| 시료 ID 중복 | Repository (`create`가 `ValueError` 발생) | Phase 0에서 이미 구현된 `JsonRepository.create`의 책임이며, Controller가 아니라 저장소 계층의 불변식이다. Controller는 이 예외를 잡아 `view.show_duplicate_error()`로 안내만 한다. |
+| 시료 ID 중복 | Repository (`create`가 `DuplicateIdError` 발생) | `JsonRepository.create`의 책임이며, Controller가 아니라 저장소 계층의 불변식이다. Controller는 이 예외만 좁게 잡아 `view.show_duplicate_error()`로 안내한다 (다른 원인의 예외는 그대로 전파 — 위 "사후 기록" 참고). |
 | 이름 중복 허용 여부 | 검증 없음 (허용) | FEATURES/01-sample.md 명시: "이름 중복은 허용하는 쪽을 기본값으로 한다". |
 
 시료 ID는 사용자가 직접 입력하지 않고 `next_id()`로 자동 채번되므로, 실제로 "시료 ID 중복" 경로가
 정상 흐름에서 발생할 일은 없다. 그럼에도 `SampleRepository.create`가 이미 이 불변식을 보장하므로
-Controller에서 방어적으로 `try/except ValueError`로 감싸 안내 메시지를 보여주는 정도로만 대응한다
+Controller에서 방어적으로 `try/except DuplicateIdError`로 감싸 안내 메시지를 보여주는 정도로만 대응한다
 (회귀 방지 및 향후 ID를 사용자 입력으로 바꿀 가능성에 대비).
 
 ## 에러 처리 정책 (phase0.md 정책 승계)
 
 - 메뉴에서 정의되지 않은 입력 → `show_error` 후 같은 하위 메뉴에서 재입력. 예외로 죽지 않는다.
 - 숫자 입력 파싱 실패 → 해당 항목만 재입력받는다 (전체 등록 과정을 처음부터 다시 하지 않는다).
-- `Sample.create` 시 발생하는 `ValueError`(중복 ID)는 `main.py`까지 전파되지 않고 `SampleController`에서
-  잡아 사용자 메시지로 변환한다.
+- `SampleRepository.create` 시 발생하는 `DuplicateIdError`(중복 ID)는 `main.py`까지 전파되지 않고
+  `SampleController`에서 잡아 사용자 메시지로 변환한다. 그 외 원인의 예외(예: 저장 중 인코딩 오류)는
+  이 처리로 가려지지 않고 그대로 전파된다.
 
 ## 테스트 범위
 
